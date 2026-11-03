@@ -11,7 +11,6 @@ class GameEngine {
         this.renderSlide(this.currentSlideId);
     }
 
-    // Modal Panduan Bermain
     static openGuideModal() {
         if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
         const modal = document.getElementById("guide-modal");
@@ -24,13 +23,96 @@ class GameEngine {
         if (modal) modal.classList.remove("active");
     }
 
+    // Modal & Render Sertifikat
+    static openCertificateModal() {
+        if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
+        const modal = document.getElementById("certificate-modal");
+        if (modal) {
+            modal.classList.add("active");
+            this.drawCertificatePreview("Pahlawan Lingkungan");
+        }
+    }
+
+    static closeCertificateModal() {
+        if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
+        const modal = document.getElementById("certificate-modal");
+        if (modal) modal.classList.remove("active");
+    }
+
+    static drawCertificatePreview(name) {
+        const canvas = document.getElementById("certificate-canvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#fffbeb";
+        ctx.fillRect(0, 0, 800, 600);
+
+        ctx.lineWidth = 14;
+        ctx.strokeStyle = "#ca8a04";
+        ctx.strokeRect(15, 15, 770, 570);
+
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#854d0e";
+        ctx.strokeRect(30, 30, 740, 540);
+
+        ctx.font = "italic bold 18px 'Quicksand', sans-serif";
+        ctx.fillStyle = "#854d0e";
+        ctx.textAlign = "center";
+        ctx.fillText("🏆 SERTIFIKAT KELULUSAN 🏆", 400, 80);
+
+        ctx.font = "bold 40px 'Fredoka One', cursive";
+        ctx.fillStyle = "#166534";
+        ctx.fillText("PAHLAWAN LINGKUNGAN", 400, 150);
+
+        ctx.font = "bold 20px 'Quicksand', sans-serif";
+        ctx.fillStyle = "#1e293b";
+        ctx.fillText("Diberikan dengan penuh kehormatan kepada:", 400, 220);
+
+        ctx.font = "italic bold 42px cursive";
+        ctx.fillStyle = "#b45309";
+        ctx.fillText((name || "Pahlawan Lingkungan").toUpperCase(), 400, 290);
+
+        ctx.font = "bold 16px 'Quicksand', sans-serif";
+        ctx.fillStyle = "#475569";
+        ctx.fillText("Atas keberanian, dedikasi, dan kepedulian yang luar biasa", 400, 350);
+        ctx.fillText("dalam menyelamatkan serta melestarikan alam di Kingdom of Green.", 400, 380);
+
+        ctx.font = "bold 16px 'Quicksand', sans-serif";
+        ctx.fillStyle = "#854d0e";
+        ctx.fillText("🎖️ KELAS PETUALANG LINGKUNGAN", 400, 440);
+
+        const tgl = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+        ctx.fillText(`Kerajaan Hijau, ${tgl}`, 400, 470);
+
+        ctx.fillStyle = "#ca8a04";
+        ctx.beginPath();
+        ctx.arc(400, 530, 30, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 11px 'Fredoka One', cursive";
+        ctx.fillText("GREEN", 400, 526);
+        ctx.fillText("SEAL", 400, 541);
+    }
+
+    static downloadCertificate() {
+        const inputName = document.getElementById("player-name-cert").value || "Pahlawan Lingkungan";
+        this.drawCertificatePreview(inputName);
+        const canvas = document.getElementById("certificate-canvas");
+        if (!canvas) return;
+
+        const downloadLink = document.createElement("a");
+        downloadLink.download = `sertifikat_kingdom_of_green_${inputName.replace(/\s+/g, '_')}.png`;
+        downloadLink.href = canvas.toDataURL("image/png");
+        downloadLink.click();
+    }
+
     static goToSlide(slideId) {
         if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
         this.currentSlideId = slideId;
         const card = document.getElementById("slide-card-container");
         card.style.opacity = 0;
         card.style.transform = "scale(0.97)";
-        
+
         setTimeout(() => {
             this.renderSlide(slideId);
             card.style.opacity = 1;
@@ -74,7 +156,6 @@ class GameEngine {
             speedX: Math.random() * 2 - 1
         }));
 
-        let animationFrame;
         const render = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             particles.forEach(p => {
@@ -87,7 +168,7 @@ class GameEngine {
             });
 
             if (particles.some(p => p.y < canvas.height)) {
-                animationFrame = requestAnimationFrame(render);
+                requestAnimationFrame(render);
             } else {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
@@ -101,7 +182,7 @@ class GameEngine {
         const viewport = document.querySelector(".game-viewport");
         if (!slide || !container) return;
 
-        // 1. TERAPKAN BACKGROUND LUAR (AREA DI BELAKANG KOTAK SLIDE)
+        // 1. BACKGROUND LUAR
         if (viewport) {
             if (slide.viewportBgImage && slide.viewportBgImage.trim() !== '') {
                 viewport.style.backgroundImage = `url('${slide.viewportBgImage}')`;
@@ -116,7 +197,7 @@ class GameEngine {
             }
         }
 
-        // 2. TERAPKAN BACKGROUND DALAM KOTAK SLIDE
+        // 2. BACKGROUND KOTAK SLIDE
         if (slide.bgImage && slide.bgImage.trim() !== '') {
             container.style.backgroundImage = `linear-gradient(rgba(255, 253, 245, 0.85), rgba(255, 253, 245, 0.85)), url('${slide.bgImage}')`;
             container.style.backgroundSize = 'cover';
@@ -130,16 +211,22 @@ class GameEngine {
             container.style.backgroundColor = '#fffdf5';
         }
 
-        let html = `
-            <div class="slide-header">
-                <h1 class="slide-title">${slide.title}</h1>
-                <div class="slide-subtitle">${slide.subtitle || ''}</div>
-            </div>
-            <div class="slide-body">
-        `;
+        let html = ``;
 
-        // Render Hiasan Gambar Tambahan jika diset oleh Admin
-        if (slide.imageUrl && slide.imageUrl.trim() !== '') {
+        // Pengecekan visibilitas Judul dan Sub-judul
+        if (!slide.hideTitle && slide.title) {
+            html += `
+                <div class="slide-header">
+                    <h1 class="slide-title">${slide.title}</h1>
+                    ${(!slide.hideSubtitle && slide.subtitle) ? `<div class="slide-subtitle">${slide.subtitle}</div>` : ''}
+                </div>
+            `;
+        }
+
+        html += `<div class="slide-body">`;
+
+        // Pengecekan visibilitas Gambar Banner
+        if (!slide.hideImage && slide.imageUrl && slide.imageUrl.trim() !== '') {
             html += `
                 <div class="slide-decor-banner">
                     <img src="${slide.imageUrl}" alt="Hiasan Slide ${slide.id}" class="slide-decor-img" onerror="this.style.display='none'">
@@ -147,13 +234,14 @@ class GameEngine {
             `;
         }
 
-        // Render Slide Types
+        // Render Tipe Slide
         if (slide.type === 'cover' || slide.type === 'info' || slide.type === 'penutup') {
             html += `
+                ${!slide.hideAvatar ? `
                 <div class="character-box">
                     <div class="avatar-icon">${slide.avatar || '👑'}</div>
                     <div class="speech-bubble">${slide.content}</div>
-                </div>
+                </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
             `;
         } else if (slide.type === 'world_map') {
             html += `
@@ -187,10 +275,11 @@ class GameEngine {
             `;
         } else if (slide.type === 'materi') {
             html += `
+                ${!slide.hideAvatar ? `
                 <div class="character-box">
                     <div class="avatar-icon">${slide.avatar || '📖'}</div>
                     <div class="speech-bubble">${slide.content}</div>
-                </div>
+                </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
             `;
             if (slide.materiCards) {
                 html += `<div class="materi-grid">`;
@@ -206,10 +295,11 @@ class GameEngine {
             }
         } else if (slide.type === 'quiz') {
             html += `
+                ${!slide.hideAvatar ? `
                 <div class="character-box">
                     <div class="avatar-icon">${slide.avatar || '❓'}</div>
                     <div class="speech-bubble">${slide.question}</div>
-                </div>
+                </div>` : `<div style="padding: 10px 0; font-weight: bold;">${slide.question}</div>`}
                 <div class="options-grid">
             `;
             slide.options.forEach((opt, idx) => {
@@ -251,6 +341,11 @@ class GameEngine {
                     <div class="avatar-icon">🏆</div>
                     <div class="speech-bubble">${slide.content}</div>
                 </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn btn-gold" onclick="GameEngine.openCertificateModal()">
+                        <i class="fa-solid fa-award"></i> Klaim & Cetak Sertifikat Pahlawan 🏆
+                    </button>
+                </div>
             `;
         } else if (slide.type === 'refleksi') {
             html += `
@@ -266,7 +361,7 @@ class GameEngine {
 
         html += `</div>`; // End slide-body
 
-        // Footer Buttons (Termasuk Penanganan Tombol Panduan Bermain di Samping Tombol Utama)
+        // Footer Buttons
         if (slide.buttons && slide.buttons.length > 0) {
             html += `<div class="slide-footer" style="display:flex; gap:12px; align-items:center;">`;
             slide.buttons.forEach(btn => {
@@ -285,7 +380,7 @@ class GameEngine {
                 }
             });
 
-            // Pada slide cover (Slide 1), sertakan otomatis tombol "Panduan Bermain" jika belum terdaftar di data slide
+            // Menyediakan tombol "Panduan Bermain" di samping pada Slide 1 jika belum terdaftar
             if (slide.id === 1 && !slide.buttons.some(b => b.target === "guide" || b.action === "guide")) {
                 html += `
                     <button class="btn btn-secondary" onclick="GameEngine.openGuideModal()">
@@ -301,7 +396,6 @@ class GameEngine {
     }
 }
 
-// Initialize on load with immediate execution fallback
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => GameEngine.init());
 } else {
