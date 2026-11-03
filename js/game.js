@@ -23,7 +23,6 @@ class GameEngine {
         if (modal) modal.classList.remove("active");
     }
 
-    // Modal & Render Sertifikat
     static openCertificateModal() {
         if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
         const modal = document.getElementById("certificate-modal");
@@ -213,7 +212,7 @@ class GameEngine {
 
         let html = ``;
 
-        // Pengecekan visibilitas Judul dan Sub-judul
+        // Render Judul dan Sub-judul
         if (!slide.hideTitle && slide.title) {
             html += `
                 <div class="slide-header">
@@ -225,7 +224,7 @@ class GameEngine {
 
         html += `<div class="slide-body">`;
 
-        // Pengecekan visibilitas Gambar Banner
+        // Render Gambar Banner Konten
         if (!slide.hideImage && slide.imageUrl && slide.imageUrl.trim() !== '') {
             html += `
                 <div class="slide-decor-banner">
@@ -234,15 +233,17 @@ class GameEngine {
             `;
         }
 
-        // Render Tipe Slide
+        // Render Tipe Slide (Dengan Pengecekan hideContent)
         if (slide.type === 'cover' || slide.type === 'info' || slide.type === 'penutup') {
-            html += `
-                ${!slide.hideAvatar ? `
-                <div class="character-box">
-                    <div class="avatar-icon">${slide.avatar || '👑'}</div>
-                    <div class="speech-bubble">${slide.content}</div>
-                </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
-            `;
+            if (!slide.hideContent && slide.content) {
+                html += `
+                    ${!slide.hideAvatar ? `
+                    <div class="character-box">
+                        <div class="avatar-icon">${slide.avatar || '👑'}</div>
+                        <div class="speech-bubble">${slide.content}</div>
+                    </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
+                `;
+            }
         } else if (slide.type === 'world_map') {
             html += `
                 <div class="map-grid">
@@ -274,13 +275,15 @@ class GameEngine {
                 </div>
             `;
         } else if (slide.type === 'materi') {
-            html += `
-                ${!slide.hideAvatar ? `
-                <div class="character-box">
-                    <div class="avatar-icon">${slide.avatar || '📖'}</div>
-                    <div class="speech-bubble">${slide.content}</div>
-                </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
-            `;
+            if (!slide.hideContent && slide.content) {
+                html += `
+                    ${!slide.hideAvatar ? `
+                    <div class="character-box">
+                        <div class="avatar-icon">${slide.avatar || '📖'}</div>
+                        <div class="speech-bubble">${slide.content}</div>
+                    </div>` : `<div style="padding: 10px 0;">${slide.content}</div>`}
+                `;
+            }
             if (slide.materiCards) {
                 html += `<div class="materi-grid">`;
                 slide.materiCards.forEach(c => {
@@ -294,14 +297,16 @@ class GameEngine {
                 html += `</div>`;
             }
         } else if (slide.type === 'quiz') {
-            html += `
-                ${!slide.hideAvatar ? `
-                <div class="character-box">
-                    <div class="avatar-icon">${slide.avatar || '❓'}</div>
-                    <div class="speech-bubble">${slide.question}</div>
-                </div>` : `<div style="padding: 10px 0; font-weight: bold;">${slide.question}</div>`}
-                <div class="options-grid">
-            `;
+            if (!slide.hideContent && slide.question) {
+                html += `
+                    ${!slide.hideAvatar ? `
+                    <div class="character-box">
+                        <div class="avatar-icon">${slide.avatar || '❓'}</div>
+                        <div class="speech-bubble">${slide.question}</div>
+                    </div>` : `<div style="padding: 10px 0; font-weight: bold;">${slide.question}</div>`}
+                `;
+            }
+            html += `<div class="options-grid">`;
             slide.options.forEach((opt, idx) => {
                 html += `
                     <button class="btn-option" onclick="GameEngine.handleQuizAnswer(${idx}, ${slide.id})">
@@ -380,7 +385,6 @@ class GameEngine {
                 }
             });
 
-            // Menyediakan tombol "Panduan Bermain" di samping pada Slide 1 jika belum terdaftar
             if (slide.id === 1 && !slide.buttons.some(b => b.target === "guide" || b.action === "guide")) {
                 html += `
                     <button class="btn btn-secondary" onclick="GameEngine.openGuideModal()">

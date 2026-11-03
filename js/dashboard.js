@@ -1,6 +1,6 @@
 /**
  * Admin / Teacher Dashboard CRUD Logic
- * Fitur: Upload Gambar, Drag & Drop Reorder, Toggle Hapus/Sembunyikan Elemen Kotak
+ * Fitur: Upload Gambar, Drag & Drop Reorder, Toggle Hapus/Sembunyikan Elemen (Termasuk Kotak Teks Tengah)
  */
 class Dashboard {
     static draggedIndex = null;
@@ -20,7 +20,6 @@ class Dashboard {
         if (modal) modal.classList.remove("active");
     }
 
-    // Mengganti dropdown biasa dengan daftar Drag & Drop visual
     static populateSlideManager() {
         const container = document.getElementById("slide-manager-container");
         if (!container) return;
@@ -56,7 +55,6 @@ class Dashboard {
         GameEngine.renderSlide(slideId);
     }
 
-    /* DRAG & DROP HANDLERS */
     static handleDragStart(e, index) {
         this.draggedIndex = index;
         e.dataTransfer.effectAllowed = "move";
@@ -112,6 +110,7 @@ class Dashboard {
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
                     <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-title" ${slide.hideTitle ? 'checked' : ''}> Hapus Judul</label>
                     <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-subtitle" ${slide.hideSubtitle ? 'checked' : ''}> Hapus Sub-judul</label>
+                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-content" ${slide.hideContent ? 'checked' : ''}> 🚫 Hapus Kotak Teks / Isi</label>
                     <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-avatar" ${slide.hideAvatar ? 'checked' : ''}> Hapus Maskot/Avatar</label>
                     <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-image" ${slide.hideImage ? 'checked' : ''}> Hapus Gambar Banner</label>
                 </div>
@@ -293,6 +292,7 @@ class Dashboard {
             bgColor: "#fffdf5",
             hideTitle: false,
             hideSubtitle: false,
+            hideContent: false,
             hideAvatar: false,
             hideImage: false,
             content: isQuiz ? "" : "Tuliskan isi materi pembelajaran di sini...",
@@ -348,6 +348,7 @@ class Dashboard {
         // Simpan Status Hapus/Sembunyikan Elemen
         slide.hideTitle = document.getElementById("toggle-hide-title").checked;
         slide.hideSubtitle = document.getElementById("toggle-hide-subtitle").checked;
+        slide.hideContent = document.getElementById("toggle-hide-content").checked;
         slide.hideAvatar = document.getElementById("toggle-hide-avatar").checked;
         slide.hideImage = document.getElementById("toggle-hide-image").checked;
 
