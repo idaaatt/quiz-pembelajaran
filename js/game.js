@@ -107,16 +107,38 @@ class GameEngine {
 
     static goToSlide(slideId) {
         if (typeof AudioEngine !== 'undefined') AudioEngine.playSound('click');
-        this.currentSlideId = slideId;
+
+        // Cari slide berdasarkan target ID
+        let targetSlide = this.slidesData.find(s => s.id === slideId);
+
+        // FALLBACK CERDAS: Jika ID target tidak ditemukan, otomatis maju ke slide berikutnya berdasarkan urutan array!
+        if (!targetSlide) {
+            const currentIndex = this.slidesData.findIndex(s => s.id === this.currentSlideId);
+            if (currentIndex !== -1 && currentIndex < this.slidesData.length - 1) {
+                targetSlide = this.slidesData[currentIndex + 1];
+            } else {
+                targetSlide = this.slidesData[0]; // Kembali ke slide awal jika sudah paling akhir
+            }
+        }
+
+        this.currentSlideId = targetSlide.id;
         const card = document.getElementById("slide-card-container");
         card.style.opacity = 0;
         card.style.transform = "scale(0.97)";
 
         setTimeout(() => {
-            this.renderSlide(slideId);
+            this.renderSlide(this.currentSlideId);
             card.style.opacity = 1;
             card.style.transform = "scale(1)";
         }, 200);
+    }
+
+    static goToNextSlideInOrder() {
+        const currentIndex = this.slidesData.findIndex(s => s.id === this.currentSlideId);
+        if (currentIndex !== -1 && currentIndex < this.slidesData.length - 1) {
+            const nextSlide = this.slidesData[currentIndex + 1];
+            this.goToSlide(nextSlide.id);
+        }
     }
 
     static updateStarCount() {
@@ -178,6 +200,7 @@ class GameEngine {
     static renderSlide(id) {
         const slide = this.slidesData.find(s => s.id === id);
         const container = document.getElementById("slide-card-container");
+        const navOuter = document.getElementById("slide-nav-outer");
         const viewport = document.querySelector(".game-viewport");
         if (!slide || !container) return;
 
@@ -196,10 +219,9 @@ class GameEngine {
             }
         }
 
-        // 2. BACKGROUND KOTAK SLIDE (TIDAK LAGI MEMAKAI LAPISAN PUTIH KETIKA Mode Gambar Poster Utuh AKTIF!)
+        // 2. BACKGROUND KOTAK SLIDE
         if (slide.bgImage && slide.bgImage.trim() !== '') {
             if (slide.isFullPoster) {
-                // Gambar Poster Utuh tanpa filter putih transparan
                 container.style.backgroundImage = `url('${slide.bgImage}')`;
             } else {
                 container.style.backgroundImage = `linear-gradient(rgba(255, 253, 245, 0.85), rgba(255, 253, 245, 0.85)), url('${slide.bgImage}')`;
@@ -230,7 +252,6 @@ class GameEngine {
 
         html += `<div class="slide-body">`;
 
-        // Pengecekan visibilitas elemen jika BUKAN Mode Poster Utuh
         if (!slide.isFullPoster) {
             if (!slide.hideImage && slide.imageUrl && slide.imageUrl.trim() !== '') {
                 html += `
@@ -364,38 +385,47 @@ class GameEngine {
         }
 
         html += `</div>`; // End slide-body
+        container.innerHTML = html;
 
-        // Footer Buttons (Render hanya jika tidak disembunyikan)
-        if (!slide.hideButtons && slide.buttons && slide.buttons.length > 0) {
-            html += `<div class="slide-footer" style="display:flex; gap:12px; align-items:center;">`;
-            slide.buttons.forEach(btn => {
-                if (btn.target === "guide" || btn.action === "guide") {
-                    html += `
-                        <button class="btn ${btn.style || 'btn-secondary'}" onclick="GameEngine.openGuideModal()">
-                            ${btn.text}
-                        </button>
-                    `;
+        // 3. RENDER TOMBOL NAVIGASI DI LUAR KOTAK SLIDE
+        if (navOuter) {
+            let navHtml = ``;
+            if (!slide.hideButtons) {
+                if (slide.buttons && slide.buttons.length > 0) {
+                    slide.buttons.forEach(btn => {
+                        if (btn.target === "guide" || btn.action === "guide") {
+                            navHtml += `
+                                <button class="btn ${btn.style || 'btn-secondary'}" onclick="GameEngine.openGuideModal()">
+                                    ${btn.text}
+                                </button>
+                            `;
+                        } else {
+                            navHtml += `
+                                <button class="btn ${btn.style || 'btn-gold'}" onclick="GameEngine.goToSlide(${btn.target})">
+                                    ${btn.text}
+                                </button>
+                            `;
+                        }
+                    });
                 } else {
-                    html += `
-                        <button class="btn ${btn.style || 'btn-gold'}" onclick="GameEngine.goToSlide(${btn.target})">
-                            ${btn.text}
+                    // Jika slide tidak punya data tombol, buatkan otomatis tombol Lanjut
+                    navHtml += `
+                        <button class="btn btn-gold" onclick="GameEngine.goToNextSlideInOrder()">
+                            Lanjut ➡️
                         </button>
                     `;
                 }
-            });
 
-            if (slide.id === 1 && !slide.buttons.some(b => b.target === "guide" || b.action === "guide")) {
-                html += `
-                    <button class="btn btn-secondary" onclick="GameEngine.openGuideModal()">
-                        <i class="fa-solid fa-book-open"></i> Panduan Bermain
-                    </button>
-                `;
+                if (slide.id === 1 && !slide.buttons?.some(b => b.target === "guide" || b.action === "guide")) {
+                    navHtml += `
+                        <button class="btn btn-secondary" onclick="GameEngine.openGuideModal()">
+                            <i class="fa-solid fa-book-open"></i> Panduan Bermain
+                        </button>
+                    `;
+                }
             }
-
-            html += `</div>`;
+            navOuter.innerHTML = navHtml;
         }
-
-        container.innerHTML = html;
     }
 }
 

@@ -1,3 +1,24 @@
+/* Container Navigasi Luar Kotak Slide */
+.game-viewport {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    min-height: calc(100vh - 70px);
+}
+
+.slide-nav-outer {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 900px;
+    z-index: 100;
+}
+
 /* Reset CSS Tombol & Komponen Dasar */
 button {
     -webkit-appearance: none;
@@ -145,20 +166,11 @@ button {
 }
 
 /* Nav & Action Buttons */
-.slide-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-    padding-top: 1rem;
-    border-top: 2px dashed #cbd5e1;
-}
-
 .btn {
-    padding: 0.8rem 1.6rem;
-    border-radius: 14px;
+    padding: 0.85rem 1.8rem;
+    border-radius: 16px;
     font-family: 'Fredoka One', cursive, sans-serif;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     cursor: pointer;
     border: none !important;
     display: inline-flex;
@@ -167,6 +179,11 @@ button {
     transition: all 0.2s ease;
     text-decoration: none;
     box-sizing: border-box;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.btn:hover {
+    transform: translateY(-2px);
 }
 
 .btn-sm {
@@ -177,7 +194,7 @@ button {
 .btn-gold {
     background-color: #f59e0b !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 0 #b45309;
+    box-shadow: 0 5px 0 #b45309;
 }
 
 .btn-gold:hover {
@@ -187,7 +204,7 @@ button {
 .btn-secondary {
     background-color: #475569 !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 0 #1e293b;
+    box-shadow: 0 5px 0 #1e293b;
 }
 
 .btn-secondary:hover {

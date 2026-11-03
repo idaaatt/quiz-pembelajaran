@@ -1,6 +1,5 @@
 /**
  * Admin / Teacher Dashboard CRUD Logic
- * Fitur: Upload Gambar, Drag & Drop Reorder, Toggle Mode Gambar Poster Utuh
  */
 class Dashboard {
     static draggedIndex = null;
@@ -79,6 +78,16 @@ class Dashboard {
         const [movedSlide] = GameEngine.slidesData.splice(sourceIndex, 1);
         GameEngine.slidesData.splice(targetIndex, 0, movedSlide);
 
+        // Update target tombol otomatis mengikuti urutan baru
+        GameEngine.slidesData.forEach((s, idx) => {
+            if (idx < GameEngine.slidesData.length - 1) {
+                const nextS = GameEngine.slidesData[idx + 1];
+                if (s.buttons && s.buttons.length > 0) {
+                    s.buttons[0].target = nextS.id;
+                }
+            }
+        });
+
         DataManager.saveSlides(GameEngine.slidesData);
         this.populateSlideManager();
         this.showToast("Urutan slide berhasil diubah!");
@@ -104,7 +113,7 @@ class Dashboard {
             </div>
             <hr class="mb-3">
 
-            <!-- FITUR UTAMA: TOGGLE GAMBAR POSTER UTUH -->
+            <!-- TOGGLE MODE POSTER UTUH -->
             <div style="background:#fef3c7; border:2px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
                 <h4 style="color:#92400e; font-size:0.95rem; margin-bottom:8px;">🖼️ Pengaturan Gambar Slide Utama</h4>
                 <label style="font-weight:700; color:#78350f; font-size:0.9rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
@@ -113,14 +122,13 @@ class Dashboard {
                 </label>
             </div>
 
-            <!-- TOGGLE SEMBUNYIKAN ELEMEN SPESIFIK -->
             <div style="background:#fffbeb; border:1px solid #fef08a; padding:10px; border-radius:10px; margin-bottom:15px;">
                 <h5 style="color:#854d0e; font-size:0.85rem; margin-bottom:6px;">👁️ Opsi Penyembunyian Manual:</h5>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-title" ${slide.hideTitle ? 'checked' : ''}> Hapus Judul</label>
                     <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-subtitle" ${slide.hideSubtitle ? 'checked' : ''}> Hapus Sub-judul</label>
                     <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-content" ${slide.hideContent ? 'checked' : ''}> Hapus Kotak Isi Teks</label>
-                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-buttons" ${slide.hideButtons ? 'checked' : ''}> Hapus Tombol Navigasi</label>
+                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-buttons" ${slide.hideButtons ? 'checked' : ''}> Hapus Tombol Navigasi Luar</label>
                 </div>
             </div>
             
@@ -149,18 +157,6 @@ class Dashboard {
                 <div class="form-group">
                     <label>Warna Latar Belakang Kotak (Jika Tanpa Gambar):</label>
                     <input type="color" id="edit-bg-color" class="form-control" style="height:38px; width:80px; cursor:pointer;" value="${slide.bgColor || '#fffdf5'}">
-                </div>
-
-                <hr style="margin:12px 0; border-top:1px dashed #86efac;">
-                <h5 style="color:#15803d; font-size:0.9rem; margin-bottom:8px;">🏞️ Latar Belakang Luar Screen</h5>
-                
-                <div class="form-group">
-                    <label>Unggah Gambar Luar (PNG/JPG):</label>
-                    <input type="file" class="form-control" accept="image/*" onchange="Dashboard.handleViewportBgUpload(event)">
-                    <input type="hidden" id="edit-viewport-bg-image" value="${slide.viewportBgImage || ''}">
-                    <div id="viewport-bg-preview-container" style="margin-top:6px;">
-                        ${slide.viewportBgImage ? `<img src="${slide.viewportBgImage}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Luar</button>` : '<small style="color:#64748b;">Menggunakan background luar standar.</small>'}
-                    </div>
                 </div>
             </div>
         `;
@@ -216,29 +212,11 @@ class Dashboard {
         document.getElementById("bg-preview-container").innerHTML = '<small style="color:#64748b;">Gambar dihapus.</small>';
     }
 
-    static handleViewportBgUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById("edit-viewport-bg-image").value = e.target.result;
-            document.getElementById("viewport-bg-preview-container").innerHTML = `
-                <img src="${e.target.result}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Luar</button>
-            `;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    static removeViewportBgImage() {
-        document.getElementById("edit-viewport-bg-image").value = "";
-        document.getElementById("viewport-bg-preview-container").innerHTML = '<small style="color:#64748b;">Background luar dihapus.</small>';
-    }
-
     static addNewSlide() {
         const type = prompt("Pilih Jenis Slide Baru:\n1 = Materi\n2 = Quiz", "1");
         if (!type) return;
 
+        const currentIdx = GameEngine.slidesData.findIndex(s => s.id === GameEngine.currentSlideId);
         const newId = GameEngine.slidesData.length > 0 ? Math.max(...GameEngine.slidesData.map(s => s.id)) + 1 : 1;
         const isQuiz = type === "2";
 
@@ -268,7 +246,17 @@ class Dashboard {
             buttons: [{ text: "Lanjut ➡️", target: newId + 1, style: "btn-gold" }]
         };
 
-        GameEngine.slidesData.push(newSlide);
+        // Sisipkan tepat di sebelah slide yang sedang dibuka
+        if (currentIdx !== -1) {
+            GameEngine.slidesData.splice(currentIdx + 1, 0, newSlide);
+            // Hubungkan tombol slide sebelumnya ke slide baru ini
+            if (GameEngine.slidesData[currentIdx].buttons && GameEngine.slidesData[currentIdx].buttons.length > 0) {
+                GameEngine.slidesData[currentIdx].buttons[0].target = newId;
+            }
+        } else {
+            GameEngine.slidesData.push(newSlide);
+        }
+
         DataManager.saveSlides(GameEngine.slidesData);
         this.populateSlideManager();
         this.selectSlide(newId);
@@ -299,12 +287,9 @@ class Dashboard {
 
         slide.title = document.getElementById("edit-title").value;
         slide.subtitle = document.getElementById("edit-subtitle").value;
-
-        slide.viewportBgImage = document.getElementById("edit-viewport-bg-image").value;
         slide.bgImage = document.getElementById("edit-bg-image").value;
         slide.bgColor = document.getElementById("edit-bg-color").value;
 
-        // Simpan Opsi Poster Utuh & Sembunyikan Elemen
         slide.isFullPoster = document.getElementById("toggle-full-poster").checked;
         slide.hideTitle = document.getElementById("toggle-hide-title").checked;
         slide.hideSubtitle = document.getElementById("toggle-hide-subtitle").checked;
@@ -325,7 +310,7 @@ class Dashboard {
         DataManager.saveSlides(GameEngine.slidesData);
         this.populateSlideManager();
         GameEngine.renderSlide(GameEngine.currentSlideId);
-        this.showToast("Slide berhasil diperbarui!");
+        this.showToast("Slide berhasil disimpan!");
         this.closeModal();
     }
 
