@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom of Green - Petualangan Menyelamatkan Kerajaan Lingkungan</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+/* Global Resets & Typography */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #11998e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #333;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-title {
+    font-family: 'Fredoka One', cursive;
+    letter-spacing: 0.5px;
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Colors & Helpers */
+.text-amber { color: #f59e0b; }
+.text-green { color: #10b981; }
+.text-red { color: #ef4444; }
+.text-blue { color: #3b82f6; }
+
+/* Top Header Bar */
+.top-bar {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+.brand {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fbbf24;
+}
+
+.stars-counter {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.top-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Main Viewport Container */
+.game-viewport {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.parchment-bg {
+    background: #fffdf5;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 8px solid #854d0e;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 40px rgba(133, 77, 14, 0.15);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 900px;
+    min-height: 540px;
+    padding: 2.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 2000;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* Slide Components & Animations */
+.slide-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.slide-title {
+    font-size: 2rem;
+    color: #78350f;
+    text-shadow: 1px 1px 0px #fef3c7;
+    margin-bottom: 0.25rem;
+}
+
+.slide-subtitle {
+    font-size: 1.05rem;
+    color: #92400e;
+    font-weight: 700;
+}
+
+.slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 1.15rem;
+    color: #334155;
+    line-height: 1.6;
+}
+
+/* Character Banner & Speech */
+.character-box {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(254, 243, 199, 0.6);
+    border: 2px dashed #d97706;
+    padding: 1.25rem;
+    border-radius: 18px;
+    margin-bottom: 1.5rem;
+}
+
+.avatar-icon {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    background: #fef08a;
+    border: 3px solid #ca8a04;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.2rem;
+    color: #854d0e;
+    flex-shrink: 0;
+}
+
+.speech-bubble {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #78350f;
+}
+
+/* Material Cards Grid */
+.materi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.materi-card {
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+.materi-card:hover {
+    transform: translateY(-4px);
+    border-color: #10b981;
+}
+
+.materi-card i {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Options / Quiz Buttons (NEUTRAL DESIGN - NO SPOILERS) */
+.options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin: 1.25rem 0;
+}
+
+.btn-option {
+    background: #ffffff;
+    border: 3px solid #d97706;
+    color: #78350f;
+    padding: 1.1rem 1.5rem;
+    border-radius: 16px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #b45309;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.btn-option:hover {
+    background: #fef3c7;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #b45309;
+}
+.btn-option:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #b45309;
+}
+.btn-option .opt-badge {
+    background: #f59e0b;
+    color: white;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Nav Buttons */
+.slide-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 2px dashed #cbd5e1;
+}
+
+.btn {
+    padding: 0.8rem 1.6rem;
+    border-radius: 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.05rem;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+}
+.btn-gold {
+    background: #f59e0b;
+    color: white;
+    box-shadow: 0 4px 0 #b45309;
+}
+.btn-gold:hover {
+    background: #d97706;
+}
+.btn-secondary {
+    background: #64748b;
+    color: white;
+    box-shadow: 0 4px 0 #334155;
+}
+.btn-icon {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    justify-content: center;
+}
+
+/* World Map Grid */
+.map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.map-card {
+    background: #ffffff;
+    border: 3px solid #cbd5e1;
+    border-radius: 18px;
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.map-card.unlocked {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+.map-card.unlocked:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(16, 185, 129, 0.2);
+}
+.map-card.locked {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: #f1f5f9;
+}
+.map-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Reward Star Box */
+.reward-display {
+    text-align: center;
+    padding: 2rem;
+}
+.big-star {
+    font-size: 5.5rem;
+    color: #f59e0b;
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.6));
+    animation: bounce 1.5s infinite alternate;
+}
+@keyframes bounce {
+    from { transform: translateY(0) scale(1); }
+    to { transform: translateY(-15px) scale(1.1); }
+}
+
+/* Refleksi Checklist */
+.checklist-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin: 1rem 0;
+}
+.check-item {
+    background: white;
+    padding: 0.9rem 1.25rem;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 700;
+}
+.check-item input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    accent-color: #10b981;
+}
+
+
+/* Custom Decoration Banner Added by Admin */
+.slide-decor-banner {
+    text-align: center;
+    margin: 1rem 0;
+}
+.slide-decor-img {
+    max-width: 100%;
+    max-height: 220px;
+    border-radius: 16px;
+    border: 3px solid #f59e0b;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    object-fit: cover;
+}
+
+
+/* Admin / Teacher Dashboard Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-box {
+    background: #ffffff;
+    width: 90%;
+    max-width: 850px;
+    max-height: 85vh;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: #78350f;
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.modal-header h2 {
+    font-size: 1.25rem;
+}
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.modal-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.dash-sidebar {
+    width: 280px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    padding: 1.25rem;
+    overflow-y: auto;
+}
+
+.dash-editor {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    background: #f1f5f9;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #e2e8f0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+.form-group label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #475569;
+    margin-bottom: 0.35rem;
+}
+.form-control {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+.form-control:focus {
+    border-color: #f59e0b;
+    outline: none;
+}
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.option-edit-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.8rem;
+    margin-bottom: 0.6rem;
+}
+.radio-correct {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+    </style>
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+
+    <header class="top-bar">
+        <div class="brand">
+            <i class="fa-solid fa-crown text-amber"></i>
+            <span>Kingdom of Green</span>
+        </div>
+        <div class="stars-counter">
+            <i class="fa-solid fa-star text-amber"></i>
+            <span id="star-count">0</span> / 5 Bintang
+        </div>
+        <div class="top-actions">
+            <button class="btn btn-sm btn-gold" onclick="Dashboard.openModal()">
+                <i class="fa-solid fa-sliders"></i> Edit Materi & Quiz
+            </button>
+            <button class="btn btn-sm btn-icon" id="sound-toggle-btn" onclick="AudioEngine.toggleSound()" title="Sound FX">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="game-viewport">
+        <div class="slide-card parchment-bg" id="slide-card-container"></div>
+    </main>
+
+    <div class="modal-overlay" id="dashboard-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-sliders"></i> Dashboard Pengaturan Guru / Admin</h2>
+                <button class="close-btn" onclick="Dashboard.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="dash-sidebar">
+                    <div class="form-group mb-2">
+                        <label for="slide-selector">Pilih Slide untuk Diedit:</label>
+                        <select id="slide-selector" class="form-control" onchange="Dashboard.loadSlideEditor(this.value)"></select>
+                    </div>
+                    <div class="dash-info">
+                        <small><i class="fa-solid fa-circle-info"></i> Perubahan materi, hiasan, dan pertanyaan akan langsung tersimpan secara lokal.</small>
+                    </div>
+                </div>
+
+                <div class="dash-editor" id="dash-editor-form"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="Dashboard.resetToDefault()">
+                    <i class="fa-solid fa-rotate-left"></i> Reset ke Standar Modul
+                </button>
+                <button class="btn btn-gold" onclick="Dashboard.saveCurrentSlide()">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Data berhasil diperbarui!</div>
+
+    <script>
+/**
+ * Data Storage & Default 30 Slides Schema for Kingdom of Green
+ */
+const STORAGE_KEY = "KINGDOM_OF_GREEN_SLIDES_V2";
+
+const DEFAULT_SLIDES = [
+    // BAGIAN 1: PEMBUKAAN
+    {
+        id: 1,
+        title: "KINGDOM OF GREEN",
+        subtitle: "Petualangan Menyelamatkan Kerajaan Lingkungan",
+        type: "cover",
+        avatar: "👑",
+        content: "Selamat datang di Kingdom of Green! Kerajaan sedang dalam bahaya karena lingkungan mulai kotor. Ayo bantu menyelamatkan kerajaan dengan mempelajari cara menyayangi lingkungan!",
+        buttons: [
+            { text: "MULAI PETUALANGAN 🚀", target: 2, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 2,
+        title: "Misi Penyelamatan Kerajaan",
+        subtitle: "Panduan & Aturan Bermain",
+        type: "info",
+        avatar: "📜",
+        content: "Untuk menyelamatkan kerajaan, kamu harus melewati lima wilayah. Setiap wilayah memiliki materi dan satu tantangan. Jawablah dengan benar untuk mendapatkan bintang penghargaan. Kumpulkan 5 bintang dan jadilah Pahlawan Lingkungan!",
+        buttons: [
+            { text: "KEMBALI ⬅️", target: 1, style: "btn-secondary" },
+            { text: "LIHAT PETA 🗺️", target: 3, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 3,
+        title: "Peta Petualangan Kingdom of Green",
+        subtitle: "Pilih Wilayah Kerajaan",
+        type: "world_map",
+        buttons: [
+            { text: "KEMBALI KE COVER 🏠", target: 1, style: "btn-secondary" }
+        ]
+    },
+
+    // BAGIAN 2: MAP 1 - GREEN VALLEY
+    {
+        id: 4,
+        title: "MAP 1: GREEN VALLEY",
+        subtitle: "Mengenal Lingkungan",
+        type: "materi",
+        avatar: "🌳",
+        content: "Lingkungan adalah segala sesuatu yang ada di sekitar kita dan memengaruhi kehidupan sehari-hari.<br><br>Contoh lingkungan: <b>Rumah, Sekolah, Taman, Sungai, dan Tempat Bermain</b>.<br>Lingkungan yang bersih membuat kita merasa nyaman ketika belajar dan bermain.",
+        materiCards: [
+            { icon: "fa-house", title: "Rumah" },
+            { icon: "fa-school", title: "Sekolah" },
+            { icon: "fa-tree", title: "Taman" },
+            { icon: "fa-water", title: "Sungai" }
+        ],
+        buttons: [
+            { text: "PETA KERAJAAN 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUTKAN MISI ⚔️", target: 5, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 5,
+        title: "Tantangan 1: Kenali Lingkungan!",
+        subtitle: "Soal Map 1",
+        type: "quiz",
+        avatar: "❓",
+        question: "Kesatria kecil, bantu kerajaan menjawab pertanyaan berikut! Manakah yang termasuk contoh lingkungan di sekitar kita?",
+        options: [
+            { id: "A", text: "Rumah, sekolah, dan taman", isCorrect: true, targetCorrect: 6, targetWrong: 7 },
+            { id: "B", text: "Sepatu, pensil, dan tas", isCorrect: false, targetCorrect: 6, targetWrong: 7 },
+            { id: "C", text: "Buku, penghapus, dan penggaris", isCorrect: false, targetCorrect: 6, targetWrong: 7 }
+        ],
+        buttons: [
+            { text: "KEMBALI KE MATERI 📖", target: 4, style: "btn-secondary" }
+        ]
+    },
+    {
+        id: 6,
+        title: "HEBAT! KAMU BENAR!",
+        subtitle: "Jawaban Benar Tantangan 1",
+        type: "feedback_correct",
+        avatar: "🌟",
+        content: "Selamat! Jawaban kamu benar! 🏡 🏫 🛝<br>Rumah, sekolah, dan taman merupakan contoh lingkungan di sekitar kita. Kamu berhasil mengembalikan keindahan Green Valley!",
+        rewardName: "⭐ BINTANG ALAM ⭐",
+        buttons: [
+            { text: "AMBIL REWARD 🌟", target: 8, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 7,
+        title: "YUK, COBA LAGI!",
+        subtitle: "Jawaban Salah Tantangan 1",
+        type: "feedback_wrong",
+        avatar: "💡",
+        content: "Belum tepat, ayo belajar lagi!<br>Ingat, lingkungan adalah segala sesuatu yang ada di sekitar kita, seperti rumah, sekolah, taman, dan sungai. Jangan menyerah!",
+        buttons: [
+            { text: "PELAJARI LAGI 📖", target: 4, style: "btn-secondary" },
+            { text: "COBA LAGI 🔄", target: 5, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 8,
+        title: "Bintang Alam Berhasil Didapatkan!",
+        subtitle: "Reward Map 1",
+        type: "reward",
+        starMap: 1,
+        content: "Yeay! Kamu berhasil menyelesaikan tantangan pertama! Green Valley kini kembali indah dan nyaman.",
+        buttons: [
+            { text: "LIHAT PETA 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUT KE MAP 2 🚀", target: 9, style: "btn-gold" }
+        ]
+    },
+
+    // BAGIAN 3: MAP 2 - ORGANIC FOREST
+    {
+        id: 9,
+        title: "MAP 2: ORGANIC FOREST",
+        subtitle: "Mengenal Jenis Sampah",
+        type: "materi",
+        avatar: "🍃",
+        content: "Tahukah kamu bahwa sampah memiliki dua jenis?<br><b>1. Sampah Organik:</b> Berasal dari makhluk hidup & mudah terurai alami (kulit pisang, daun kering, sisa sayuran). Bermanfaat untuk kompos.<br><b>2. Sampah Anorganik:</b> Sulit terurai secara alami (botol plastik, bungkus makanan, kaleng, kaca).",
+        buttons: [
+            { text: "PETA KERAJAAN 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUTKAN MISI ⚔️", target: 10, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 10,
+        title: "Tantangan 2: Penjaga Hutan!",
+        subtitle: "Soal Map 2",
+        type: "quiz",
+        avatar: "❓",
+        question: "Wah! Ada sampah yang harus dipilah di Organic Forest. Manakah kelompok yang seluruhnya termasuk sampah organik?",
+        options: [
+            { id: "A", text: "Botol plastik, kaleng, dan kaca", isCorrect: false, targetCorrect: 11, targetWrong: 12 },
+            { id: "B", text: "Kulit pisang, daun kering, dan sisa sayuran", isCorrect: true, targetCorrect: 11, targetWrong: 12 },
+            { id: "C", text: "Bungkus makanan, botol plastik, dan kaleng", isCorrect: false, targetCorrect: 11, targetWrong: 12 }
+        ],
+        buttons: [
+            { text: "KEMBALI KE MATERI 📖", target: 9, style: "btn-secondary" }
+        ]
+    },
+    {
+        id: 11,
+        title: "LUAR BIASA! JAWABANMU BENAR!",
+        subtitle: "Jawaban Benar Tantangan 2",
+        type: "feedback_correct",
+        avatar: "🌟",
+        content: "Selamat! Jawaban kamu benar! 🍌 🍂 🥦<br>Kulit pisang, daun kering, dan sisa sayuran merupakan sampah organik. Kamu berhasil membantu penghuni Organic Forest memilah sampah!",
+        rewardName: "⭐ BINTANG PEMILAH ⭐",
+        buttons: [
+            { text: "AMBIL REWARD 🌟", target: 13, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 12,
+        title: "OOPS! BELUM TEPAT!",
+        subtitle: "Jawaban Salah Tantangan 2",
+        type: "feedback_wrong",
+        avatar: "💡",
+        content: "Belum tepat, ayo belajar lagi!<br>Ingat:<br>• Organik: kulit pisang, daun kering, sisa sayuran.<br>• Anorganik: botol plastik, kaleng, kaca.",
+        buttons: [
+            { text: "PELAJARI LAGI 📖", target: 9, style: "btn-secondary" },
+            { text: "COBA LAGI 🔄", target: 10, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 13,
+        title: "Bintang Pemilah Berhasil Didapatkan!",
+        subtitle: "Reward Map 2",
+        type: "reward",
+        starMap: 2,
+        content: "Hebat! Kamu sudah berhasil menyelamatkan Organic Forest. Kini sampah di hutan dapat dipilah sesuai jenisnya.",
+        buttons: [
+            { text: "LIHAT PETA 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUT KE MAP 3 🚀", target: 14, style: "btn-gold" }
+        ]
+    },
+
+    // BAGIAN 4: MAP 3 - HEALTHY KINGDOM
+    {
+        id: 14,
+        title: "MAP 3: HEALTHY KINGDOM",
+        subtitle: "Manfaat Menjaga Kebersihan",
+        type: "materi",
+        avatar: "🏰",
+        content: "Mengapa kita harus menjaga kebersihan lingkungan?<br>1. Membuat nyaman belajar & bermain.<br>2. Menjaga kesehatan keluarga.<br>3. Mengurangi sarang lalat & nyamuk.<br>4. Mencegah saluran air tersumbat.<br>5. Lingkungan terlihat lebih indah.",
+        buttons: [
+            { text: "PETA KERAJAAN 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUTKAN MISI ⚔️", target: 15, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 15,
+        title: "Tantangan 3: Selamatkan Healthy Kingdom!",
+        subtitle: "Soal Map 3",
+        type: "quiz",
+        avatar: "❓",
+        question: "Kerajaan membutuhkan bantuanmu! Apa manfaat menjaga kebersihan lingkungan?",
+        options: [
+            { id: "A", text: "Membuat lingkungan menjadi kotor", isCorrect: false, targetCorrect: 16, targetWrong: 17 },
+            { id: "B", text: "Menyebabkan banyak sampah berserakan", isCorrect: false, targetCorrect: 16, targetWrong: 17 },
+            { id: "C", text: "Membuat lingkungan nyaman dan membantu menjaga kesehatan", isCorrect: true, targetCorrect: 16, targetWrong: 17 }
+        ],
+        buttons: [
+            { text: "KEMBALI KE MATERI 📖", target: 14, style: "btn-secondary" }
+        ]
+    },
+    {
+        id: 16,
+        title: "SELAMAT! KAMU HEBAT!",
+        subtitle: "Jawaban Benar Tantangan 3",
+        type: "feedback_correct",
+        avatar: "🌟",
+        content: "Benar sekali! Lingkungan yang bersih membuat kita nyaman belajar dan bermain serta membantu menjaga kesehatan. Kamu berhasil mengembalikan kesehatan Healthy Kingdom!",
+        rewardName: "⭐ BINTANG KESEHATAN ⭐",
+        buttons: [
+            { text: "AMBIL REWARD 🌟", target: 18, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 17,
+        title: "AYO, JANGAN MENYERAH!",
+        subtitle: "Jawaban Salah Tantangan 3",
+        type: "feedback_wrong",
+        avatar: "💡",
+        content: "Belum tepat, ayo belajar lagi!<br>Ingat, lingkungan yang bersih membuat kita nyaman, sehat, dan dapat mengurangi tempat berkembang biaknya lalat dan nyamuk.",
+        buttons: [
+            { text: "PELAJARI LAGI 📖", target: 14, style: "btn-secondary" },
+            { text: "COBA LAGI 🔄", target: 15, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 18,
+        title: "Bintang Kesehatan Berhasil Didapatkan!",
+        subtitle: "Reward Map 3",
+        type: "reward",
+        starMap: 3,
+        content: "Hebat! Healthy Kingdom kini kembali sehat, bersih, dan nyaman. Teruskan petualanganmu!",
+        buttons: [
+            { text: "LIHAT PETA 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUT KE MAP 4 🚀", target: 19, style: "btn-gold" }
+        ]
+    },
+
+    // BAGIAN 5: MAP 4 - RIVER OF DANGER
+    {
+        id: 19,
+        title: "MAP 4: RIVER OF DANGER",
+        subtitle: "Bahaya Membuang Sampah Sembarangan",
+        type: "materi",
+        avatar: "🌊",
+        content: "Apa yang terjadi jika membuang sampah sembarangan?<br>• Lingkungan kotor & menimbulkan bau busuk.<br>• Tempat berkembangnya kuman & hewan pembawa penyakit.<br>• Menyumbat selokan sehingga meningkatkan risiko banjir.<br>• Sampah plastik mencemari air & membahayakan hewan.",
+        buttons: [
+            { text: "PETA KERAJAAN 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUTKAN MISI ⚔️", target: 20, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 20,
+        title: "Tantangan 4: Selamatkan Sungai!",
+        subtitle: "Soal Map 4",
+        type: "quiz",
+        avatar: "❓",
+        question: "Waduh! Sungai kerajaan dipenuhi sampah. Apa yang dapat terjadi jika sampah menyumbat selokan?",
+        options: [
+            { id: "A", text: "Aliran air menjadi lancar", isCorrect: false, targetCorrect: 21, targetWrong: 22 },
+            { id: "B", text: "Meningkatkan risiko banjir ketika hujan turun", isCorrect: true, targetCorrect: 21, targetWrong: 22 },
+            { id: "C", text: "Air menjadi semakin bersih", isCorrect: false, targetCorrect: 21, targetWrong: 22 }
+        ],
+        buttons: [
+            { text: "KEMBALI KE MATERI 📖", target: 19, style: "btn-secondary" }
+        ]
+    },
+    {
+        id: 21,
+        title: "YEAAY! KAMU BERHASIL!",
+        subtitle: "Jawaban Benar Tantangan 4",
+        type: "feedback_correct",
+        avatar: "🌟",
+        content: "Jawaban kamu benar! Sampah yang menyumbat selokan dapat menghambat aliran air dan meningkatkan risiko banjir ketika hujan turun. Kamu berhasil menyelamatkan River of Danger!",
+        rewardName: "⭐ BINTANG PENYELAMAT ⭐",
+        buttons: [
+            { text: "AMBIL REWARD 🌟", target: 23, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 22,
+        title: "BELUM BERHASIL!",
+        subtitle: "Jawaban Salah Tantangan 4",
+        type: "feedback_wrong",
+        avatar: "💡",
+        content: "Belum tepat, ayo belajar lagi!<br>Ingat, sampah yang menyumbat selokan dapat menghambat aliran air. Akibatnya, risiko banjir dapat meningkat ketika hujan turun.",
+        buttons: [
+            { text: "PELAJARI LAGI 📖", target: 19, style: "btn-secondary" },
+            { text: "COBA LAGI 🔄", target: 20, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 23,
+        title: "Bintang Penyelamat Berhasil Didapatkan!",
+        subtitle: "Reward Map 4",
+        type: "reward",
+        starMap: 4,
+        content: "Selamat! Kamu berhasil menyelamatkan sungai kerajaan. Kini River of Danger kembali menjadi sungai yang bersih dan nyaman.",
+        buttons: [
+            { text: "LIHAT PETA 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUT KE MAP 5 🚀", target: 24, style: "btn-gold" }
+        ]
+    },
+
+    // BAGIAN 6: MAP 5 - NATURE CASTLE
+    {
+        id: 24,
+        title: "MAP 5: NATURE CASTLE",
+        subtitle: "Cara Menyayangi Lingkungan",
+        type: "materi",
+        avatar: "🏰",
+        content: "Bagaimana cara kita menyayangi lingkungan?<br>1. Membuang sampah pada tempatnya.<br>2. Memilah sampah organik dan anorganik.<br>3. Melaksanakan piket kelas.<br>4. Membersihkan halaman & menyiram tanaman.<br>5. Mengurangi penggunaan plastik sekali pakai.",
+        buttons: [
+            { text: "PETA KERAJAAN 🗺️", target: 3, style: "btn-secondary" },
+            { text: "LANJUTKAN MISI ⚔️", target: 25, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 25,
+        title: "Tantangan Terakhir: Jadilah Pahlawan!",
+        subtitle: "Soal Map 5",
+        type: "quiz",
+        avatar: "❓",
+        question: "Ini adalah tantangan terakhir! Manakah tindakan yang menunjukkan kebiasaan menyayangi lingkungan?",
+        options: [
+            { id: "A", text: "Membuang sampah ke sungai", isCorrect: false, targetCorrect: 26, targetWrong: 27 },
+            { id: "B", text: "Membiarkan sampah berserakan di kelas", isCorrect: false, targetCorrect: 26, targetWrong: 27 },
+            { id: "C", text: "Membuang sampah pada tempatnya dan merawat tanaman", isCorrect: true, targetCorrect: 26, targetWrong: 27 }
+        ],
+        buttons: [
+            { text: "KEMBALI KE MATERI 📖", target: 24, style: "btn-secondary" }
+        ]
+    },
+    {
+        id: 26,
+        title: "SELAMAT! KAMU PAHLAWAN LINGKUNGAN!",
+        subtitle: "Jawaban Benar Tantangan 5",
+        type: "feedback_correct",
+        avatar: "🌟",
+        content: "Jawaban kamu benar! Membuang sampah pada tempatnya dan merawat tanaman merupakan contoh kebiasaan menyayangi lingkungan. Kamu berhasil menyelesaikan seluruh tantangan!",
+        rewardName: "⭐ BINTANG PAHLAWAN ⭐",
+        buttons: [
+            { text: "KUMPULKAN BINTANG 🏆", target: 28, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 27,
+        title: "SEDIKIT LAGI! COBA LAGI!",
+        subtitle: "Jawaban Salah Tantangan 5",
+        type: "feedback_wrong",
+        avatar: "💡",
+        content: "Belum tepat, ayo belajar lagi!<br>Ingat, kita dapat menyayangi lingkungan dengan membuang sampah pada tempatnya, merawat tanaman, dan melaksanakan piket kelas.",
+        buttons: [
+            { text: "PELAJARI LAGI 📖", target: 24, style: "btn-secondary" },
+            { text: "COBA LAGI 🔄", target: 25, style: "btn-gold" }
+        ]
+    },
+
+    // BAGIAN 7: PENYELESAIAN & REFLEKSI
+    {
+        id: 28,
+        title: "SELAMAT! MISI BERHASIL DISELESAIKAN!",
+        subtitle: "Kemenangan Kingdom of Green",
+        type: "victory",
+        avatar: "🏆",
+        content: "Horeee! Kamu berhasil menyelesaikan 5 tantangan! Sekarang Kingdom of Green kembali bersih, sehat, indah, dan nyaman.<br><br>Kamu telah mendapatkan 5 Bintang Penghargaan. Mulai sekarang, kamu resmi menjadi <b>PAHLAWAN LINGKUNGAN</b>!",
+        buttons: [
+            { text: "MAIN LAGI 🔄", target: 3, style: "btn-secondary" },
+            { text: "LANJUT KE REFLEKSI 📜", target: 29, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 29,
+        title: "Ayo, Refleksikan Petualanganmu!",
+        subtitle: "Jurnal Refleksi Peserta Didik",
+        type: "refleksi",
+        buttons: [
+            { text: "SELESAI & CETAK SERTIFIKAT 🎓", target: 30, style: "btn-gold" }
+        ]
+    },
+    {
+        id: 30,
+        title: "TERIMA KASIH, PAHLAWAN LINGKUNGAN!",
+        subtitle: "Penutup",
+        type: "penutup",
+        avatar: "🌟",
+        content: "Petualangan kita telah selesai. Ingatlah, lingkungan yang bersih dan sehat dimulai dari kebiasaan kecil yang kita lakukan setiap hari.<br><br><h3 class='text-green text-center'>&quot;LINGKUNGAN BERSIH, HIDUP SEHAT, HATI GEMBIRA!&quot;</h3>",
+        buttons: [
+            { text: "KEMBALI KE AWAL 🏠", target: 1, style: "btn-gold" }
+        ]
+    }
+];
+
+// LocalStorage Helper
+class DataManager {
+    static getSlides() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                return JSON.parse(saved);
+            }
+        } catch (e) {
+            console.warn("LocalStorage tidak dapat diakses, menggunakan data standar:", e);
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_SLIDES));
+    }
+
+    static saveSlides(slides) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(slides));
+        } catch (e) {
+            console.warn("Gagal menyimpan ke LocalStorage:", e);
+        }
+    }
+
+    static resetSlides() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {
+            console.warn("Gagal menghapus LocalStorage:", e);
+        }
+        return JSON.parse(JSON.stringify(DEFAULT_SLIDES));
+    }
+}
+
+
+/**
+ * Web Audio API Sound Effects Engine
+ */
+class AudioEngine {
+    static soundEnabled = true;
+
+    static toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        const btn = document.getElementById("sound-toggle-btn");
+        if (btn) {
+            btn.innerHTML = this.soundEnabled 
+                ? '<i class="fa-solid fa-volume-high"></i>' 
+                : '<i class="fa-solid fa-volume-xmark"></i>';
+        }
+    }
+
+    static playSound(type) {
+        if (!this.soundEnabled) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            if (type === 'click') {
+                osc.frequency.setValueAtTime(400, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.05);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+                osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, ctx.currentTime);
+                osc.frequency.setValueAtTime(160, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            } else if (type === 'star') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+                osc.frequency.setValueAtTime(1174.66, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            }
+        } catch(e) {
+            console.log("Audio not supported or blocked");
+        }
+    }
+}
+
+
+/**
+ * Core Game Engine & Slide Renderer for Kingdom of Green
+ */
+class GameEngine {
+    static currentSlideId = 1;
+    static unlockedStars = [false, false, false, false, false];
+    static slidesData = [];
+
+    static init() {
+        this.slidesData = DataManager.getSlides();
+        this.renderSlide(this.currentSlideId);
+    }
+
+    static goToSlide(slideId) {
+        AudioEngine.playSound('click');
+        this.currentSlideId = slideId;
+        const card = document.getElementById("slide-card-container");
+        card.style.opacity = 0;
+        card.style.transform = "scale(0.97)";
+        
+        setTimeout(() => {
+            this.renderSlide(slideId);
+            card.style.opacity = 1;
+            card.style.transform = "scale(1)";
+        }, 200);
+    }
+
+    static updateStarCount() {
+        const count = this.unlockedStars.filter(Boolean).length;
+        document.getElementById("star-count").innerText = count;
+    }
+
+    static handleQuizAnswer(optionIndex, slideId) {
+        const slide = this.slidesData.find(s => s.id === slideId);
+        if (!slide || !slide.options || !slide.options[optionIndex]) return;
+
+        const selected = slide.options[optionIndex];
+        if (selected.isCorrect) {
+            AudioEngine.playSound('correct');
+            this.goToSlide(selected.targetCorrect || (slideId + 1));
+        } else {
+            AudioEngine.playSound('wrong');
+            this.goToSlide(selected.targetWrong || (slideId + 2));
+        }
+    }
+
+    static triggerConfetti() {
+        const canvas = document.getElementById("confetti-canvas");
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = Array.from({ length: 70 }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height - canvas.height,
+            color: ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#ec4899'][Math.floor(Math.random() * 5)],
+            size: Math.random() * 8 + 4,
+            speedY: Math.random() * 4 + 2,
+            speedX: Math.random() * 2 - 1
+        }));
+
+        let animationFrame;
+        const render = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.y += p.speedY;
+                p.x += p.speedX;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            if (particles.some(p => p.y < canvas.height)) {
+                animationFrame = requestAnimationFrame(render);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        };
+        render();
+    }
+
+    static renderSlide(id) {
+        const slide = this.slidesData.find(s => s.id === id);
+        const container = document.getElementById("slide-card-container");
+        if (!slide || !container) return;
+
+        let html = `
+            <div class="slide-header">
+                <h1 class="slide-title">${slide.title}</h1>
+                <div class="slide-subtitle">${slide.subtitle || ''}</div>
+            </div>
+            <div class="slide-body">
+        `;
+
+        // Render Hiasan Gambar Tambahan jika diset oleh Admin
+        if (slide.imageUrl && slide.imageUrl.trim() !== '') {
+            html += `
+                <div class="slide-decor-banner">
+                    <img src="${slide.imageUrl}" alt="Hiasan Slide ${slide.id}" class="slide-decor-img" onerror="this.style.display='none'">
+                </div>
+            `;
+        }
+
+        // Render Slide Types
+        if (slide.type === 'cover' || slide.type === 'info' || slide.type === 'penutup') {
+            html += `
+                <div class="character-box">
+                    <div class="avatar-icon">${slide.avatar || '👑'}</div>
+                    <div class="speech-bubble">${slide.content}</div>
+                </div>
+            `;
+        } else if (slide.type === 'world_map') {
+            html += `
+                <div class="map-grid">
+                    <div class="map-card ${this.unlockedStars[0] || true ? 'unlocked' : 'locked'}" onclick="GameEngine.goToSlide(4)">
+                        <div class="map-icon">🏡</div>
+                        <h4>1. Green Valley</h4>
+                        <small>${this.unlockedStars[0] ? '⭐ Selesai' : '🔓 Terbuka'}</small>
+                    </div>
+                    <div class="map-card ${this.unlockedStars[0] ? 'unlocked' : 'locked'}" onclick="${this.unlockedStars[0] ? 'GameEngine.goToSlide(9)' : ''}">
+                        <div class="map-icon">🍃</div>
+                        <h4>2. Organic Forest</h4>
+                        <small>${this.unlockedStars[1] ? '⭐ Selesai' : (this.unlockedStars[0] ? '🔓 Terbuka' : '🔒 Terkunci')}</small>
+                    </div>
+                    <div class="map-card ${this.unlockedStars[1] ? 'unlocked' : 'locked'}" onclick="${this.unlockedStars[1] ? 'GameEngine.goToSlide(14)' : ''}">
+                        <div class="map-icon">🏰</div>
+                        <h4>3. Healthy Kingdom</h4>
+                        <small>${this.unlockedStars[2] ? '⭐ Selesai' : (this.unlockedStars[1] ? '🔓 Terbuka' : '🔒 Terkunci')}</small>
+                    </div>
+                    <div class="map-card ${this.unlockedStars[2] ? 'unlocked' : 'locked'}" onclick="${this.unlockedStars[2] ? 'GameEngine.goToSlide(19)' : ''}">
+                        <div class="map-icon">🌊</div>
+                        <h4>4. River of Danger</h4>
+                        <small>${this.unlockedStars[3] ? '⭐ Selesai' : (this.unlockedStars[2] ? '🔓 Terbuka' : '🔒 Terkunci')}</small>
+                    </div>
+                    <div class="map-card ${this.unlockedStars[3] ? 'unlocked' : 'locked'}" onclick="${this.unlockedStars[3] ? 'GameEngine.goToSlide(24)' : ''}">
+                        <div class="map-icon">👑</div>
+                        <h4>5. Nature Castle</h4>
+                        <small>${this.unlockedStars[4] ? '⭐ Selesai' : (this.unlockedStars[3] ? '🔓 Terbuka' : '🔒 Terkunci')}</small>
+                    </div>
+                </div>
+            `;
+        } else if (slide.type === 'materi') {
+            html += `
+                <div class="character-box">
+                    <div class="avatar-icon">${slide.avatar || '📖'}</div>
+                    <div class="speech-bubble">${slide.content}</div>
+                </div>
+            `;
+            if (slide.materiCards) {
+                html += `<div class="materi-grid">`;
+                slide.materiCards.forEach(c => {
+                    html += `
+                        <div class="materi-card">
+                            <i class="fa-solid ${c.icon} text-green"></i>
+                            <h4>${c.title}</h4>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+        } else if (slide.type === 'quiz') {
+            html += `
+                <div class="character-box">
+                    <div class="avatar-icon">${slide.avatar || '❓'}</div>
+                    <div class="speech-bubble">${slide.question}</div>
+                </div>
+                <div class="options-grid">
+            `;
+            slide.options.forEach((opt, idx) => {
+                html += `
+                    <button class="btn-option" onclick="GameEngine.handleQuizAnswer(${idx}, ${slide.id})">
+                        <span class="opt-badge">${opt.id}</span>
+                        <span>${opt.text}</span>
+                    </button>
+                `;
+            });
+            html += `</div>`;
+        } else if (slide.type === 'feedback_correct' || slide.type === 'feedback_wrong') {
+            const isCorrect = slide.type === 'feedback_correct';
+            html += `
+                <div class="character-box" style="border-color: ${isCorrect ? '#10b981' : '#ef4444'}">
+                    <div class="avatar-icon" style="background: ${isCorrect ? '#d1fae5' : '#fee2e2'}">${slide.avatar}</div>
+                    <div class="speech-bubble">${slide.content}</div>
+                </div>
+            `;
+        } else if (slide.type === 'reward') {
+            if (slide.starMap) {
+                this.unlockedStars[slide.starMap - 1] = true;
+                this.updateStarCount();
+                AudioEngine.playSound('star');
+                this.triggerConfetti();
+            }
+            html += `
+                <div class="reward-display">
+                    <i class="fa-solid fa-star big-star"></i>
+                    <h2 class="text-amber mt-2" style="font-size: 1.8rem;">⭐ BINTANG TERBUKA ⭐</h2>
+                    <p class="mt-2" style="font-size: 1.15rem; font-weight:700;">${slide.content}</p>
+                </div>
+            `;
+        } else if (slide.type === 'victory') {
+            AudioEngine.playSound('star');
+            this.triggerConfetti();
+            html += `
+                <div class="character-box" style="border-color: #f59e0b; background: #fffbeb;">
+                    <div class="avatar-icon">🏆</div>
+                    <div class="speech-bubble">${slide.content}</div>
+                </div>
+            `;
+        } else if (slide.type === 'refleksi') {
+            html += `
+                <p>Setelah menyelesaikan petualangan, mari kita ingat kembali apa yang sudah dipelajari. Berikan tanda centang pada pernyataan di bawah ini!</p>
+                <div class="checklist-group">
+                    <label class="check-item"><input type="checkbox"> Saya dapat menjelaskan mengapa menjaga kebersihan lingkungan itu penting.</label>
+                    <label class="check-item"><input type="checkbox"> Saya dapat membedakan sampah organik dan anorganik.</label>
+                    <label class="check-item"><input type="checkbox"> Saya dapat menyebutkan dampak membuang sampah sembarangan.</label>
+                    <label class="check-item"><input type="checkbox"> Saya dapat menyebutkan kebiasaan menyayangi lingkungan.</label>
+                </div>
+            `;
+        }
+
+        html += `</div>`; // End slide-body
+
+        // Footer Buttons
+        if (slide.buttons && slide.buttons.length > 0) {
+            html += `<div class="slide-footer">`;
+            slide.buttons.forEach(btn => {
+                html += `
+                    <button class="btn ${btn.style || 'btn-gold'}" onclick="GameEngine.goToSlide(${btn.target})">
+                        ${btn.text}
+                    </button>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        container.innerHTML = html;
+    }
+}
+
+// Initialize on load with immediate execution fallback
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => GameEngine.init());
+} else {
+    GameEngine.init();
+}
+
+
+/**
+ * Admin / Teacher Dashboard CRUD Logic with PIN Protection & Asset Decoration Features
+ */
+class Dashboard {
+    static adminPin = "1234";
+
+    static getStoredPin() {
+        return localStorage.getItem("KINGDOM_ADMIN_PIN") || "1234";
+    }
+
+    static savePin(newPin) {
+        if (newPin && newPin.trim().length >= 4) {
+            localStorage.setItem("KINGDOM_ADMIN_PIN", newPin.trim());
+            return true;
+        }
+        return false;
+    }
+
+    static openModal() {
+        AudioEngine.playSound('click');
+        const currentPin = this.getStoredPin();
+        const inputPin = prompt("🔑 Masukkan PIN Keamanan Admin / Guru untuk Mengedit (Default PIN: 1234):");
+        
+        if (inputPin === null) return; // User cancelled
+        
+        if (inputPin.trim() !== currentPin) {
+            alert("❌ PIN Salah! Akses Dashboard Admin Ditolak.");
+            return;
+        }
+
+        const modal = document.getElementById("dashboard-modal");
+        if (!modal) return;
+        this.populateSlideSelector();
+        this.loadSlideEditor(GameEngine.currentSlideId);
+        modal.classList.add("active");
+    }
+
+    static closeModal() {
+        AudioEngine.playSound('click');
+        const modal = document.getElementById("dashboard-modal");
+        if (modal) modal.classList.remove("active");
+    }
+
+    static populateSlideSelector() {
+        const select = document.getElementById("slide-selector");
+        if (!select) return;
+        select.innerHTML = GameEngine.slidesData.map(s => `
+            <option value="${s.id}" ${s.id === GameEngine.currentSlideId ? 'selected' : ''}>
+                Slide ${s.id}: ${s.title.substring(0, 24)}...
+            </option>
+        `).join('');
+    }
+
+    static loadSlideEditor(slideId) {
+        const id = parseInt(slideId, 10);
+        const slide = GameEngine.slidesData.find(s => s.id === id);
+        const form = document.getElementById("dash-editor-form");
+        if (!slide || !form) return;
+
+        const currentPin = this.getStoredPin();
+
+        let formHtml = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Edit Slide ${slide.id} (${slide.type.toUpperCase()})</h3>
+                <span style="font-size:0.85rem; background:#fef3c7; color:#92400e; padding:4px 8px; border-radius:6px; font-weight:bold;">
+                    🔑 PIN Admin: ${currentPin}
+                </span>
+            </div>
+            <hr class="mb-3">
+            
+            <div class="form-group">
+                <label>Judul Slide:</label>
+                <input type="text" id="edit-title" class="form-control" value="${slide.title || ''}">
+            </div>
+            <div class="form-group">
+                <label>Sub-Judul / Label:</label>
+                <input type="text" id="edit-subtitle" class="form-control" value="${slide.subtitle || ''}">
+            </div>
+
+            <!-- HIASAN & ASET VISUAL -->
+            <div style="background:#f0fdf4; border:2px solid #86efac; padding:12px; border-radius:12px; margin-bottom:15px;">
+                <h4 style="color:#166534; font-size:1rem; margin-bottom:8px;">🎨 Hiasan & Aset Visual Slide</h4>
+                
+                <div class="form-group">
+                    <label>Avatar / Ikon Maskot (Emoji):</label>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="text" id="edit-avatar" class="form-control" style="width:100px; text-align:center; font-size:1.4rem;" value="${slide.avatar || '👑'}">
+                        <small style="color:#475569;">Pilih dari preset: 
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='👑'">👑</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🌳'">🌳</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🍃'">🍃</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🏰'">🏰</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🌊'">🌊</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🌟'">🌟</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='📜'">📜</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='🧹'">🧹</span>
+                            <span style="cursor:pointer; font-size:1.2rem; margin:0 3px;" onclick="document.getElementById('edit-avatar').value='♻️'">♻️</span>
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Aset Gambar Tambahan (URL Gambar / Foto Hiasan):</label>
+                    <input type="text" id="edit-image-url" class="form-control" placeholder="Contoh: https://example.com/hiasan.png" value="${slide.imageUrl || ''}">
+                    <small style="color:#64748b;">Kosongkan jika tidak memakai gambar tambahan pada slide ini.</small>
+                </div>
+            </div>
+        `;
+
+        if (slide.type === 'quiz') {
+            formHtml += `
+                <div class="form-group">
+                    <label>Pertanyaan / Soal:</label>
+                    <textarea id="edit-question" class="form-control">${slide.question || ''}</textarea>
+                </div>
+                <h4 class="mt-3 mb-2">Pilihan Jawaban (3 Opsi):</h4>
+            `;
+            slide.options.forEach((opt, idx) => {
+                formHtml += `
+                    <div class="option-edit-box">
+                        <label>Opsi ${opt.id}:</label>
+                        <input type="text" id="edit-opt-text-${idx}" class="form-control mb-1" value="${opt.text}">
+                        <div class="radio-correct">
+                            <input type="radio" name="correct-opt" id="opt-correct-${idx}" value="${idx}" ${opt.isCorrect ? 'checked' : ''}>
+                            <label for="opt-correct-${idx}">Tandai sebagai Kunci Jawaban Benar</label>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            formHtml += `
+                <div class="form-group">
+                    <label>Isi Teks / Materi (Mendukung HTML):</label>
+                    <textarea id="edit-content" class="form-control">${slide.content || ''}</textarea>
+                </div>
+            `;
+        }
+
+        formHtml += `
+            <div style="margin-top:20px; background:#fff7ed; border:1px solid #ffedd5; padding:10px; border-radius:8px;">
+                <label style="font-weight:bold; color:#9a3412;">🔐 Pengaturan Keamanan PIN Admin</label>
+                <div style="display:flex; gap:8px; margin-top:5px;">
+                    <input type="password" id="new-admin-pin" class="form-control" placeholder="Masukkan PIN Baru (Min. 4 Digit)">
+                    <button class="btn btn-sm btn-gold" onclick="Dashboard.changePin()">Ubah PIN</button>
+                </div>
+            </div>
+        `;
+
+        form.innerHTML = formHtml;
+    }
+
+    static changePin() {
+        const newPin = document.getElementById("new-admin-pin").value;
+        if (this.savePin(newPin)) {
+            this.showToast("🔑 PIN Admin Berhasil Diperbarui!");
+            this.loadSlideEditor(GameEngine.currentSlideId);
+        } else {
+            alert("❌ PIN minimal 4 karakter!");
+        }
+    }
+
+    static saveCurrentSlide() {
+        const select = document.getElementById("slide-selector");
+        const id = parseInt(select.value, 10);
+        const slide = GameEngine.slidesData.find(s => s.id === id);
+        if (!slide) return;
+
+        slide.title = document.getElementById("edit-title").value;
+        slide.subtitle = document.getElementById("edit-subtitle").value;
+        slide.avatar = document.getElementById("edit-avatar").value;
+        slide.imageUrl = document.getElementById("edit-image-url").value;
+
+        if (slide.type === 'quiz') {
+            slide.question = document.getElementById("edit-question").value;
+            const selectedCorrectIdx = parseInt(document.querySelector('input[name="correct-opt"]:checked').value, 10);
+
+            slide.options.forEach((opt, idx) => {
+                opt.text = document.getElementById(`edit-opt-text-${idx}`).value;
+                opt.isCorrect = (idx === selectedCorrectIdx);
+            });
+        } else {
+            slide.content = document.getElementById("edit-content").value;
+        }
+
+        DataManager.saveSlides(GameEngine.slidesData);
+        GameEngine.renderSlide(GameEngine.currentSlideId);
+        this.showToast("Slide & Hiasan berhasil diperbarui!");
+        this.closeModal();
+    }
+
+    static resetToDefault() {
+        if (confirm("Apakah Anda yakin ingin mengembalikan seluruh slide ke materi awal modul?")) {
+            GameEngine.slidesData = DataManager.resetSlides();
+            GameEngine.renderSlide(GameEngine.currentSlideId);
+            this.showToast("Data di-reset ke standar modul.");
+            this.closeModal();
+        }
+    }
+
+    static showToast(msg) {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.innerText = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+}
+
+    </script>
+</body>
+</html>

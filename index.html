@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kingdom of Green - Petualangan Menyelamatkan Kerajaan Lingkungan</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- Top Status Bar -->
+    <header class="top-bar">
+        <div class="brand">
+            <i class="fa-solid fa-crown text-amber"></i>
+            <span>Kingdom of Green</span>
+        </div>
+        <div class="stars-counter">
+            <i class="fa-solid fa-star text-amber"></i>
+            <span id="star-count">0</span> / 5 Bintang
+        </div>
+        <div class="top-actions">
+            <button class="btn btn-sm btn-gold" onclick="Dashboard.openModal()">
+                <i class="fa-solid fa-sliders"></i> Edit Materi & Quiz
+            </button>
+            <button class="btn btn-sm btn-icon" id="sound-toggle-btn" onclick="AudioEngine.toggleSound()" title="Sound FX">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <main class="game-viewport">
+        <div class="slide-card parchment-bg" id="slide-card-container">
+            <!-- Dynamic Content rendered by JS engine -->
+        </div>
+    </main>
+
+    <!-- Modal Panduan Bermain -->
+    <div class="modal-overlay" id="guide-modal">
+        <div class="modal-box" style="max-width: 650px;">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-book-open"></i> Panduan & Cara Bermain</h2>
+                <button class="close-btn" onclick="GameEngine.closeGuideModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem; display: block; overflow-y: auto;">
+                <div class="guide-step" style="display:flex; gap:12px; margin-bottom:15px; align-items:flex-start;">
+                    <div style="background:#fef08a; border:2px solid #ca8a04; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.3rem; flex-shrink:0;">📖</div>
+                    <div>
+                        <h4 style="color:#78350f; font-size:1.05rem; margin-bottom:4px;">1. Pahami Materi Pembelajaran</h4>
+                        <p style="font-size:0.95rem; color:#475569;">Baca setiap petunjuk dan cerita dari Raja Hijau serta karakter kerajaan untuk mempelajari cara menyayangi lingkungan.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step" style="display:flex; gap:12px; margin-bottom:15px; align-items:flex-start;">
+                    <div style="background:#d1fae5; border:2px solid #10b981; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.3rem; flex-shrink:0;">🗺️</div>
+                    <div>
+                        <h4 style="color:#166534; font-size:1.05rem; margin-bottom:4px;">2. Jelajahi Peta Kerajaan (World Map)</h4>
+                        <p style="font-size:0.95rem; color:#475569;">Selesaikan setiap tantangan di lokasi (misal: Green Valley, Organic Forest) untuk membuka wilayah baru.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step" style="display:flex; gap:12px; margin-bottom:15px; align-items:flex-start;">
+                    <div style="background:#fef3c7; border:2px solid #f59e0b; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.3rem; flex-shrink:0;">❓</div>
+                    <div>
+                        <h4 style="color:#92400e; font-size:1.05rem; margin-bottom:4px;">3. Jawab Kuis dengan Tepat</h4>
+                        <p style="font-size:0.95rem; color:#475569;">Pilih opsi jawaban yang paling tepat pada setiap kuis untuk mendapatkan bintang dan melanjutkan ke tahap berikutnya.</p>
+                    </div>
+                </div>
+
+                <div class="guide-step" style="display:flex; gap:12px; margin-bottom:10px; align-items:flex-start;">
+                    <div style="background:#fce7f3; border:2px solid #ec4899; width:45px; height:45px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:1.3rem; flex-shrink:0;">⭐</div>
+                    <div>
+                        <h4 style="color:#9d174d; font-size:1.05rem; margin-bottom:4px;">4. Kumpulkan 5 Bintang Kemenangan</h4>
+                        <p style="font-size:0.95rem; color:#475569;">Kumpulkan total 5 bintang di bagian atas layar untuk mengembalikan kedamaian dan menyelamatkan Kingdom of Green!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: flex-end;">
+                <button class="btn btn-gold" onclick="GameEngine.closeGuideModal()">
+                    <i class="fa-solid fa-check"></i> Mengerti, Ayo Bermain!
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teacher Dashboard Modal -->
+    <div class="modal-overlay" id="dashboard-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fa-solid fa-sliders"></i> Dashboard Pengaturan Guru / Admin</h2>
+                <button class="close-btn" onclick="Dashboard.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="dash-sidebar">
+                    <div class="form-group mb-2">
+                        <label for="slide-selector">Pilih Slide untuk Diedit:</label>
+                        <select id="slide-selector" class="form-control" onchange="Dashboard.loadSlideEditor(this.value)">
+                            <!-- Dynamic slide list options -->
+                        </select>
+                    </div>
+                    <button class="btn btn-sm btn-gold mb-3" style="width:100%; justify-content:center;" onclick="Dashboard.addNewSlide()">
+                        <i class="fa-solid fa-plus"></i> Tambah Slide Baru
+                    </button>
+                    <div class="dash-info">
+                        <small><i class="fa-solid fa-circle-info"></i> Perubahan materi, hiasan gambar, dan pertanyaan tersimpan secara otomatis.</small>
+                    </div>
+                </div>
+
+                <div class="dash-editor" id="dash-editor-form">
+                    <!-- Dynamic editor form fields -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="Dashboard.resetToDefault()">
+                    <i class="fa-solid fa-rotate-left"></i> Reset ke Standar Modul
+                </button>
+                <button class="btn btn-gold" onclick="Dashboard.saveCurrentSlide()">
+                    <i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Data berhasil diperbarui!</div>
+
+    <!-- JavaScript Modules -->
+    <script src="js/data.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

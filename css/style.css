@@ -1,0 +1,123 @@
+/* Global Resets & Typography */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    font-family: 'Quicksand', sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #11998e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    color: #333;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-title {
+    font-family: 'Fredoka One', cursive;
+    letter-spacing: 0.5px;
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 999;
+}
+
+/* Colors & Helpers */
+.text-amber { color: #f59e0b; }
+.text-green { color: #10b981; }
+.text-red { color: #ef4444; }
+.text-blue { color: #3b82f6; }
+
+/* Top Header Bar */
+.top-bar {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    z-index: 10;
+}
+
+.brand {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #fbbf24;
+}
+
+.stars-counter {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.top-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Main Viewport Container */
+.game-viewport {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+}
+
+.parchment-bg {
+    background: #fffdf5;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 8px solid #854d0e;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4), inset 0 0 40px rgba(133, 77, 14, 0.15);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 900px;
+    min-height: 540px;
+    padding: 2.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #10b981;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 2000;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
