@@ -1,6 +1,6 @@
 /**
  * Admin / Teacher Dashboard CRUD Logic
- * Fitur: Upload Gambar, Drag & Drop Reorder, Toggle Hapus/Sembunyikan Elemen (Termasuk Kotak Teks Tengah)
+ * Fitur: Upload Gambar, Drag & Drop Reorder, Toggle Mode Gambar Poster Utuh
  */
 class Dashboard {
     static draggedIndex = null;
@@ -104,15 +104,23 @@ class Dashboard {
             </div>
             <hr class="mb-3">
 
-            <!-- TOGGLE ELEMEN KOTAK (HAPUS / SEMBUNYIKAN) -->
-            <div style="background:#fffbeb; border:2px solid #fef08a; padding:12px; border-radius:12px; margin-bottom:15px;">
-                <h4 style="color:#854d0e; font-size:0.95rem; margin-bottom:8px;">👁️ Sembunyikan / Hapus Elemen di Kotak:</h4>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
-                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-title" ${slide.hideTitle ? 'checked' : ''}> Hapus Judul</label>
-                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-subtitle" ${slide.hideSubtitle ? 'checked' : ''}> Hapus Sub-judul</label>
-                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-content" ${slide.hideContent ? 'checked' : ''}> 🚫 Hapus Kotak Teks / Isi</label>
-                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-avatar" ${slide.hideAvatar ? 'checked' : ''}> Hapus Maskot/Avatar</label>
-                    <label style="font-weight:700; color:#78350f; font-size:0.85rem;"><input type="checkbox" id="toggle-hide-image" ${slide.hideImage ? 'checked' : ''}> Hapus Gambar Banner</label>
+            <!-- FITUR UTAMA: TOGGLE GAMBAR POSTER UTUH -->
+            <div style="background:#fef3c7; border:2px solid #f59e0b; padding:12px; border-radius:12px; margin-bottom:15px;">
+                <h4 style="color:#92400e; font-size:0.95rem; margin-bottom:8px;">🖼️ Pengaturan Gambar Slide Utama</h4>
+                <label style="font-weight:700; color:#78350f; font-size:0.9rem; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="toggle-full-poster" style="width:18px; height:18px;" ${slide.isFullPoster ? 'checked' : ''}> 
+                    <span><strong>Mode Gambar Poster Utuh</strong> (Hapus lapisan putih pudar & sembunyikan semua teks bawaan)</span>
+                </label>
+            </div>
+
+            <!-- TOGGLE SEMBUNYIKAN ELEMEN SPESIFIK -->
+            <div style="background:#fffbeb; border:1px solid #fef08a; padding:10px; border-radius:10px; margin-bottom:15px;">
+                <h5 style="color:#854d0e; font-size:0.85rem; margin-bottom:6px;">👁️ Opsi Penyembunyian Manual:</h5>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-title" ${slide.hideTitle ? 'checked' : ''}> Hapus Judul</label>
+                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-subtitle" ${slide.hideSubtitle ? 'checked' : ''}> Hapus Sub-judul</label>
+                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-content" ${slide.hideContent ? 'checked' : ''}> Hapus Kotak Isi Teks</label>
+                    <label style="font-weight:700; color:#78350f; font-size:0.8rem;"><input type="checkbox" id="toggle-hide-buttons" ${slide.hideButtons ? 'checked' : ''}> Hapus Tombol Navigasi</label>
                 </div>
             </div>
             
@@ -125,60 +133,34 @@ class Dashboard {
                 <input type="text" id="edit-subtitle" class="form-control" value="${slide.subtitle || ''}">
             </div>
 
-            <!-- HIASAN & BACKGROUND -->
+            <!-- BACKGROUND KOTAK & VIEWPORT -->
             <div style="background:#f0fdf4; border:2px solid #86efac; padding:14px; border-radius:12px; margin-bottom:15px;">
-                <h4 style="color:#166534; font-size:0.95rem; margin-bottom:10px;">🎨 Hiasan & Background Latar Belakang</h4>
+                <h4 style="color:#166534; font-size:0.95rem; margin-bottom:10px;">🎨 Unggah Gambar Latar / Poster</h4>
                 
                 <div class="form-group">
-                    <label>Avatar / Emoji Maskot:</label>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input type="text" id="edit-avatar" class="form-control" style="width:80px; text-align:center; font-size:1.3rem;" value="${slide.avatar || '👑'}">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Gambar Banner Konten (PNG/JPG):</label>
-                    <input type="file" class="form-control" accept="image/*" onchange="Dashboard.handleImageUpload(event)">
-                    <input type="hidden" id="edit-image-url" value="${slide.imageUrl || ''}">
-                    <div id="image-preview-container" style="margin-top:6px;">
-                        ${slide.imageUrl ? `<img src="${slide.imageUrl}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeImage()">Hapus Gambar</button>` : '<small style="color:#64748b;">Belum ada gambar konten.</small>'}
-                    </div>
-                </div>
-
-                <!-- BACKGROUND LUAR -->
-                <hr style="margin:12px 0; border-top:1px dashed #86efac;">
-                <h5 style="color:#15803d; font-size:0.9rem; margin-bottom:8px;">🏞️ Latar Belakang Luar (Di Belakang Kotak)</h5>
-                
-                <div class="form-group">
-                    <label>Unggah Gambar Background Belakang Kotak (PNG/JPG):</label>
-                    <input type="file" class="form-control" accept="image/*" onchange="Dashboard.handleViewportBgUpload(event)">
-                    <input type="hidden" id="edit-viewport-bg-image" value="${slide.viewportBgImage || ''}">
-                    <div id="viewport-bg-preview-container" style="margin-top:6px;">
-                        ${slide.viewportBgImage ? `<img src="${slide.viewportBgImage}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Belakang</button>` : '<small style="color:#64748b;">Menggunakan background luar standar.</small>'}
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Warna Latar Belakang Luar:</label>
-                    <input type="color" id="edit-viewport-bg-color" class="form-control" style="height:38px; width:80px; cursor:pointer;" value="${slide.viewportBgColor || '#0f172a'}">
-                </div>
-
-                <!-- BACKGROUND DALAM KOTAK -->
-                <hr style="margin:12px 0; border-top:1px dashed #86efac;">
-                <h5 style="color:#15803d; font-size:0.9rem; margin-bottom:8px;">📜 Latar Belakang Dalam Kotak Slide</h5>
-                
-                <div class="form-group">
-                    <label>Unggah Gambar Background Kotak (PNG/JPG):</label>
+                    <label>🖼️ Unggah Gambar Slide Utama / Background Kotak (PNG/JPG):</label>
                     <input type="file" class="form-control" accept="image/*" onchange="Dashboard.handleBgUpload(event)">
                     <input type="hidden" id="edit-bg-image" value="${slide.bgImage || ''}">
                     <div id="bg-preview-container" style="margin-top:6px;">
-                        ${slide.bgImage ? `<img src="${slide.bgImage}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeBgImage()">Hapus Background Kotak</button>` : '<small style="color:#64748b;">Menggunakan background kotak standar.</small>'}
+                        ${slide.bgImage ? `<img src="${slide.bgImage}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeBgImage()">Hapus Gambar</button>` : '<small style="color:#64748b;">Belum ada gambar slide.</small>'}
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Warna Latar Belakang Kotak:</label>
+                    <label>Warna Latar Belakang Kotak (Jika Tanpa Gambar):</label>
                     <input type="color" id="edit-bg-color" class="form-control" style="height:38px; width:80px; cursor:pointer;" value="${slide.bgColor || '#fffdf5'}">
+                </div>
+
+                <hr style="margin:12px 0; border-top:1px dashed #86efac;">
+                <h5 style="color:#15803d; font-size:0.9rem; margin-bottom:8px;">🏞️ Latar Belakang Luar Screen</h5>
+                
+                <div class="form-group">
+                    <label>Unggah Gambar Luar (PNG/JPG):</label>
+                    <input type="file" class="form-control" accept="image/*" onchange="Dashboard.handleViewportBgUpload(event)">
+                    <input type="hidden" id="edit-viewport-bg-image" value="${slide.viewportBgImage || ''}">
+                    <div id="viewport-bg-preview-container" style="margin-top:6px;">
+                        ${slide.viewportBgImage ? `<img src="${slide.viewportBgImage}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;"> <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Luar</button>` : '<small style="color:#64748b;">Menggunakan background luar standar.</small>'}
+                    </div>
                 </div>
             </div>
         `;
@@ -215,23 +197,23 @@ class Dashboard {
         form.innerHTML = formHtml;
     }
 
-    static handleImageUpload(event) {
+    static handleBgUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
-            document.getElementById("edit-image-url").value = e.target.result;
-            document.getElementById("image-preview-container").innerHTML = `
+            document.getElementById("edit-bg-image").value = e.target.result;
+            document.getElementById("bg-preview-container").innerHTML = `
                 <img src="${e.target.result}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeImage()">Hapus Gambar</button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeBgImage()">Hapus Gambar</button>
             `;
         };
         reader.readAsDataURL(file);
     }
 
-    static removeImage() {
-        document.getElementById("edit-image-url").value = "";
-        document.getElementById("image-preview-container").innerHTML = '<small style="color:#64748b;">Gambar dihapus.</small>';
+    static removeBgImage() {
+        document.getElementById("edit-bg-image").value = "";
+        document.getElementById("bg-preview-container").innerHTML = '<small style="color:#64748b;">Gambar dihapus.</small>';
     }
 
     static handleViewportBgUpload(event) {
@@ -242,7 +224,7 @@ class Dashboard {
             document.getElementById("edit-viewport-bg-image").value = e.target.result;
             document.getElementById("viewport-bg-preview-container").innerHTML = `
                 <img src="${e.target.result}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Belakang</button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeViewportBgImage()">Hapus Background Luar</button>
             `;
         };
         reader.readAsDataURL(file);
@@ -251,25 +233,6 @@ class Dashboard {
     static removeViewportBgImage() {
         document.getElementById("edit-viewport-bg-image").value = "";
         document.getElementById("viewport-bg-preview-container").innerHTML = '<small style="color:#64748b;">Background luar dihapus.</small>';
-    }
-
-    static handleBgUpload(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById("edit-bg-image").value = e.target.result;
-            document.getElementById("bg-preview-container").innerHTML = `
-                <img src="${e.target.result}" style="max-height:80px; border-radius:8px; border:1px solid #ccc;">
-                <button type="button" class="btn btn-sm btn-secondary" onclick="Dashboard.removeBgImage()">Hapus Background Kotak</button>
-            `;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    static removeBgImage() {
-        document.getElementById("edit-bg-image").value = "";
-        document.getElementById("bg-preview-container").innerHTML = '<small style="color:#64748b;">Background kotak dihapus.</small>';
     }
 
     static addNewSlide() {
@@ -290,11 +253,11 @@ class Dashboard {
             viewportBgColor: "#0f172a",
             bgImage: "",
             bgColor: "#fffdf5",
+            isFullPoster: false,
             hideTitle: false,
             hideSubtitle: false,
             hideContent: false,
-            hideAvatar: false,
-            hideImage: false,
+            hideButtons: false,
             content: isQuiz ? "" : "Tuliskan isi materi pembelajaran di sini...",
             question: isQuiz ? "Tuliskan pertanyaan kuis di sini?" : "",
             options: isQuiz ? [
@@ -336,21 +299,17 @@ class Dashboard {
 
         slide.title = document.getElementById("edit-title").value;
         slide.subtitle = document.getElementById("edit-subtitle").value;
-        slide.avatar = document.getElementById("edit-avatar").value;
-        slide.imageUrl = document.getElementById("edit-image-url").value;
 
         slide.viewportBgImage = document.getElementById("edit-viewport-bg-image").value;
-        slide.viewportBgColor = document.getElementById("edit-viewport-bg-color").value;
-
         slide.bgImage = document.getElementById("edit-bg-image").value;
         slide.bgColor = document.getElementById("edit-bg-color").value;
 
-        // Simpan Status Hapus/Sembunyikan Elemen
+        // Simpan Opsi Poster Utuh & Sembunyikan Elemen
+        slide.isFullPoster = document.getElementById("toggle-full-poster").checked;
         slide.hideTitle = document.getElementById("toggle-hide-title").checked;
         slide.hideSubtitle = document.getElementById("toggle-hide-subtitle").checked;
         slide.hideContent = document.getElementById("toggle-hide-content").checked;
-        slide.hideAvatar = document.getElementById("toggle-hide-avatar").checked;
-        slide.hideImage = document.getElementById("toggle-hide-image").checked;
+        slide.hideButtons = document.getElementById("toggle-hide-buttons").checked;
 
         if (slide.type === 'quiz') {
             slide.question = document.getElementById("edit-question").value;
@@ -366,7 +325,7 @@ class Dashboard {
         DataManager.saveSlides(GameEngine.slidesData);
         this.populateSlideManager();
         GameEngine.renderSlide(GameEngine.currentSlideId);
-        this.showToast("Slide & Elemen berhasil disimpan!");
+        this.showToast("Slide berhasil diperbarui!");
         this.closeModal();
     }
 
